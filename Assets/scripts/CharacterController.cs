@@ -51,6 +51,8 @@ public class CharacterController : MonoBehaviour
 
     private void OnMove(InputValue context)
     {
+        
+        
         _moveAction = context.Get<Vector2>();
 
         if (_moveAction.x < 0 && _isFacingRight)

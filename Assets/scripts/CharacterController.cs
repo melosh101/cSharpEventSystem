@@ -1,67 +1,34 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CharacterController : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private Animator animator;
-    private bool isGrounded;
-    private bool isFacingRight = true;
-    private bool isMoving = false;
-    private Vector2 moveAction = new Vector2(0, 0);
-
     private static readonly int IsRunning = Animator.StringToHash("isRunning");
+    private Animator _animator;
+    private bool _isFacingRight = true;
+    private bool _isGrounded;
+    private bool _isMoving;
+    private Vector2 _moveAction = new(0, 0);
+    private Rigidbody2D _rb;
+    private GameObject _self;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        rb = gameObject.GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
+        _rb = gameObject.GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>();
+        _self = gameObject;
     }
 
     private void FixedUpdate()
     {
-        if (isGrounded)
+        if (_isGrounded)
         {
-            rb.AddForce(moveAction * 1, ForceMode2D.Impulse);
+            _rb.AddForce(_moveAction * 1, ForceMode2D.Impulse);
             return;
         }
-        rb.AddForce(new Vector2(moveAction.x * 1, 0), ForceMode2D.Impulse);
-    }
 
-    private void OnMove(InputValue context)
-    {
-        moveAction = context.Get<Vector2>();
-        
-        if (moveAction.x < 0 && isFacingRight)
-        {
-            Flip();
-        } else if (moveAction.x > 0 && !isFacingRight)
-        {
-            Flip();
-        }
-        
-        
-        if (!isMoving)
-        {
-            animator.SetBool(IsRunning, true);
-            isMoving = true;
-            return;
-        }
-        isMoving = false;
-
-        animator.SetBool(IsRunning, false);
-    }
-
-    private void Flip()
-    {
-        isFacingRight = !isFacingRight;
-        var currentScale = gameObject.transform.localScale;
-        currentScale.x *= -1;
-        gameObject.transform.localScale = currentScale;
+        _rb.AddForce(new Vector2(_moveAction.x * 1, 0), ForceMode2D.Impulse);
     }
 
     private void OnCollisionEnter2D(Collision2D other)
@@ -69,7 +36,7 @@ public class CharacterController : MonoBehaviour
         if (other.gameObject.layer.Equals(6))
         {
             Debug.Log("player is now grounded");
-            isGrounded = true;
+            _isGrounded = true;
         }
     }
 
@@ -78,7 +45,36 @@ public class CharacterController : MonoBehaviour
         if (other.gameObject.layer.Equals(6))
         {
             Debug.Log("no longer grounded");
-            isGrounded = false;
+            _isGrounded = false;
         }
+    }
+
+    private void OnMove(InputValue context)
+    {
+        _moveAction = context.Get<Vector2>();
+
+        if (_moveAction.x < 0 && _isFacingRight)
+            Flip();
+        else if (_moveAction.x > 0 && !_isFacingRight) Flip();
+
+
+        if (!_isMoving)
+        {
+            _animator.SetBool(IsRunning, true);
+            _isMoving = true;
+            return;
+        }
+
+        _isMoving = false;
+
+        _animator.SetBool(IsRunning, false);
+    }
+
+    private void Flip()
+    {
+        _isFacingRight = !_isFacingRight;
+        var currentScale = gameObject.transform.localScale;
+        currentScale.x *= -1;
+        gameObject.transform.localScale = currentScale;
     }
 }
